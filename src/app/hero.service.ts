@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Hero } from './hero';
 import { HEROES } from './mock-heroes';
 import { Observable } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { MessageService } from './message.service';
 
@@ -15,11 +16,27 @@ export class HeroService {
     private messageService: MessageService) { }
 
   private heroesUrl = 'api/heroes';
+  // 方法名（参数名：参数类型）：返回类型 {
+
+  // }
   
-  getHeros(): Observable<Hero[]> {
+  getHeroes(): Observable<Hero[]> {
     //return Observable.of(HEROES);
     // get heroes from serve
-    return this.http.get<Hero[]>(this.heroesUrl);
+    return this.http.get<Hero[]>(this.heroesUrl)
+    .pipe(
+      catchError(this.handleError('getHeroes', []))
+    );
+  }
+
+  private handleError<T>(opertions = 'opertions', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+
+      this.log(`$(opertions) failed: $(error.message)`);
+
+      return Observable.of(result as T);
+    }
   }
 
   getHerosById(id: number): Observable<Hero> {
