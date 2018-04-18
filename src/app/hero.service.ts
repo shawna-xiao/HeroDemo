@@ -7,7 +7,10 @@ import { catchError, map, tap } from 'rxjs/operators';
 
 import { MessageService } from './message.service';
 
-HttpHeaders
+const httpOptions = {
+  headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+}
+
 @Injectable()
 export class HeroService {
 
@@ -20,12 +23,29 @@ export class HeroService {
 
   // }
   
-  getHeroes(): Observable<Hero[]> {
+  getHeros(): Observable<Hero[]> {
     //return Observable.of(HEROES);
-    // get heroes from serve
+    // get heroes from server
     return this.http.get<Hero[]>(this.heroesUrl)
     .pipe(
+      tap(heroes => this.log(`fetched heroes`)),
       catchError(this.handleError('getHeroes', []))
+    );
+  }
+
+  getHero(id: number): Observable<Hero> {
+    const url = `$(this.heroesUrl)/$(id)`;
+    return this.http.get<Hero>(url).pipe(
+      tap(_ => this.log(`fetched hero id = $(id)`)),
+      catchError(this.handleError<Hero>(`getHero id = $(id)`))
+    );
+  }
+
+  updateHero(hero: Hero): Observable<any> {
+    return this.http.put(this.heroesUrl, hero, httpOptions)
+    .pipe(
+      tap(_ => this.log(`update id=$(hero.id)`)),
+      catchError(this.handleError<any>('update'))
     );
   }
 
@@ -48,6 +68,5 @@ export class HeroService {
   private log(message: string) {
     this.messageService.add('HeroService' + message);
   }
-  
 
 }
