@@ -51,7 +51,7 @@ export class HeroService {
 
   private handleError<T>(opertions = 'opertions', result?: T) {
     return (error: any): Observable<T> => {
-      console.log(error);
+      console.error(error);
 
       this.log(`$(opertions) failed: $(error.message)`);
 
@@ -85,6 +85,18 @@ export class HeroService {
     .pipe(
       tap(_ => this.log(`delete hero id=$(id)`)),
       catchError(this.handleError<Hero>('deleteHero'))
+    );
+  }
+
+  seacherHeroes(term: string) : Observable<Hero[]> {
+    if (!term.trim) {
+      return Observable.of();
+    }
+    
+    return this.http.get<Hero[]>(`api/heroes/?name=${term}`)
+    .pipe(
+      tap(_ => this.log(`find heroes matching "${term}"`)),
+      catchError(this.handleError<Hero[]>('searchHero', []))
     );
   }
 
